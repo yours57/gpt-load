@@ -2,6 +2,7 @@ package httpclient
 
 import (
 	"fmt"
+	"crypto/tls"
 	"net"
 	"net/http"
 	"net/url"
@@ -27,6 +28,7 @@ type Config struct {
 	TLSHandshakeTimeout   time.Duration
 	ExpectContinueTimeout time.Duration
 	ProxyURL              string
+	ProxyTLSSkipVerify    bool
 }
 
 // HTTPClientManager manages the lifecycle of HTTP clients.
@@ -85,6 +87,14 @@ func (m *HTTPClientManager) GetClient(config *Config) *http.Client {
 		ReadBufferSize:        config.ReadBufferSize,
 	}
 
+	// Configure TLS settings for proxy if needed
+	if config.ProxyTLSSkipVerify {
+	    transport.TLSClientConfig = &tls.Config{
+	        InsecureSkipVerify: true,
+	    }
+	    logrus.Warnf("Proxy TLS certificate verification is disabled - this is not recommended for production use")
+	}
+
 	// Set http proxy.
 	if config.ProxyURL != "" {
 		proxyURL, err := url.Parse(config.ProxyURL)
@@ -110,7 +120,7 @@ func (m *HTTPClientManager) GetClient(config *Config) *http.Client {
 // getFingerprint generates a unique string representation of the client configuration.
 func (c *Config) getFingerprint() string {
 	return fmt.Sprintf(
-		"ct:%.0fs|rt:%.0fs|it:%.0fs|mic:%d|mich:%d|rht:%.0fs|dc:%t|wbs:%d|rbs:%d|fh2:%t|tlst:%.0fs|ect:%.0fs|proxy:%s",
+		"ct:%.0fs|rt:%.0fs|it:%.0fs|mic:%d|mich:%d|rht:%.0fs|dc:%t|wbs:%d|rbs:%d|fh2:%t|tlst:%.0fs|ect:%.0fs|proxy:%s|ptls:%t",
 		c.ConnectTimeout.Seconds(),
 		c.RequestTimeout.Seconds(),
 		c.IdleConnTimeout.Seconds(),
@@ -124,5 +134,6 @@ func (c *Config) getFingerprint() string {
 		c.TLSHandshakeTimeout.Seconds(),
 		c.ExpectContinueTimeout.Seconds(),
 		c.ProxyURL,
+		c.ProxyTLSSkipVerify,
 	)
 }
