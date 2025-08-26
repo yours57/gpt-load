@@ -32,6 +32,7 @@ type SystemSettings struct {
 	MaxIdleConns          int    `json:"max_idle_conns" default:"100" name:"最大空闲连接数" category:"请求设置" desc:"HTTP 客户端连接池中允许的最大空闲连接总数。" validate:"required,min=1"`
 	MaxIdleConnsPerHost   int    `json:"max_idle_conns_per_host" default:"50" name:"每主机最大空闲连接数" category:"请求设置" desc:"HTTP 客户端连接池对每个上游主机允许的最大空闲连接数。" validate:"required,min=1"`
 	ProxyURL              string `json:"proxy_url" name:"代理服务器地址" category:"请求设置" desc:"全局 HTTP/HTTPS 代理服务器地址，例如：http://user:pass@host:port。如果为空，则使用环境变量配置。"`
+	ProxyTLSSkipVerify    bool   `json:"proxy_tls_skip_verify" name:"跳过代理证书验证" category:"请求设置" desc:"是否跳过代理服务器的 TLS 证书验证。启用此选项会降低安全性，仅在必要时使用。"`
 
 	// 密钥配置
 	MaxRetries                   int `json:"max_retries" default:"3" name:"最大重试次数" category:"密钥配置" desc:"单个请求使用不同 Key 的最大重试次数，0为不重试。" validate:"required,min=0"`
